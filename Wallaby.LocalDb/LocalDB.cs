@@ -17,10 +17,9 @@ namespace Wallaby.LocalDb
         /// Gets the default path used for saving the database file.
         /// </summary>
         /// <returns></returns>
-        public static string GetDatabaseDefaultPath()
-        {
-            return (Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), DEFAULT_DATA_FOLDER));
-        }
+        public static string GetDatabaseDefaultPath() => 
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), DEFAULT_DATA_FOLDER);
+        
 
         /// <summary>
         /// Derive the full path of the database file
@@ -28,10 +27,9 @@ namespace Wallaby.LocalDb
         /// <param name="databaseName"></param>
         /// <param name="basePath"></param>
         /// <returns></returns>
-        public static string GetDatabaseFullPath(string databaseName, string basePath)
-        {
-            return Path.Combine(basePath, databaseName + ".mdf");
-        }
+        public static string GetDatabaseFullPath(string databaseName, string basePath) =>
+            Path.Combine(basePath, databaseName + ".mdf");
+        
 
         /// <summary>
         /// Gets the path of the log file
@@ -122,10 +120,7 @@ namespace Wallaby.LocalDb
                     new SqlCommand($"exec sp_detach_db '{databaseName}'", connection).ExecuteNonQuery();
                 }
             }
-            catch
-            {
-                
-            }
+            catch { }
         }
     }
 
