@@ -12,6 +12,7 @@ namespace Wallaby.LocalDb
     public class LocalDB
     {
         private const string DEFAULT_DATA_FOLDER = "Data";
+        private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\v11.0;Initial Catalog=master;Integrated Security=True";
         /// <summary>
         /// Gets the default path used for saving the database file.
         /// </summary>
@@ -63,10 +64,10 @@ namespace Wallaby.LocalDb
 
             try
             {
-                string connectionString = String.Format(@"Data Source=(LocalDB)\v11.0;Initial Catalog=master;Integrated Security=True");
-                using (var connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(BASE_CONNECTION_STRING))
                 {
                     connection.Open();
+                    DetachDatabase(databaseName);
                     SqlCommand command = connection.CreateCommand();
                     command.CommandText = $"CREATE DATABASE {databaseName} ON (NAME = N'{databaseName}', FILENAME = '{fullFilePath}')";
                     command.ExecuteNonQuery();
@@ -108,26 +109,22 @@ namespace Wallaby.LocalDb
         public static void RemoveDatabase(string databaseName, string basePath)
         {
             File.Delete(GetDatabaseFullPath(databaseName, basePath));
+            File.Delete(GetDatabaseLogPath(databaseName, basePath));
         }
 
-        public static bool DetachDatabase(string dbName)
+        public static void DetachDatabase(string databaseName)
         {
             try
             {
-                string connectionString = String.Format(@"Data Source=(LocalDB)\v11.0;Initial Catalog=master;Integrated Security=True");
-                using (var connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(BASE_CONNECTION_STRING))
                 {
                     connection.Open();
-                    SqlCommand cmd = connection.CreateCommand();
-                    cmd.CommandText = String.Format("exec sp_detach_db '{0}'", dbName);
-                    cmd.ExecuteNonQuery();
-
-                    return true;
+                    new SqlCommand($"exec sp_detach_db '{databaseName}'", connection).ExecuteNonQuery();
                 }
             }
             catch
             {
-                return false;
+                
             }
         }
     }

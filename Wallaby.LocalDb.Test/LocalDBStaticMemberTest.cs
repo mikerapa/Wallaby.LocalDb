@@ -62,9 +62,16 @@ namespace Wallaby.LocalDb.Test
             string tempBasePath = Path.GetTempPath();
             LocalDB.DetachDatabase(testDBName);
 
+
+            // Before starting the test, make sure these files don't exist
+            File.Delete(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath));
+            File.Delete(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath));
+
+
             Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
             LocalDB.CreateDatabase(testDBName, tempBasePath);
             Assert.IsTrue(LocalDB.DatabaseExists(testDBName, tempBasePath));
+            LocalDB.DetachDatabase(testDBName);
             LocalDB.RemoveDatabase(testDBName, tempBasePath);
             Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
             LocalDB.DetachDatabase(testDBName);
