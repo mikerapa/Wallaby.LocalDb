@@ -75,6 +75,31 @@ namespace Wallaby.LocalDb
             catch { throw;}
         }
 
+        /// <summary>
+        /// Gets a connection to the database, based on the default file path
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <returns></returns>
+        public static SqlConnection GetConnection(string databaseName) => GetConnection(databaseName, GetDatabaseDefaultPath());
+
+
+        /// <summary>
+        /// Creates a SQLConnection object and opens it. 
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="basePath"></param>
+        /// <returns></returns>
+        public static SqlConnection GetConnection(string databaseName, string basePath)
+        {
+            if (!DatabaseExists(databaseName, basePath))
+            {
+                throw new FileNotFoundException($"Cannot find database {databaseName} at path {basePath}");
+            }
+            var connection = new SqlConnection(BASE_CONNECTION_STRING);
+            connection.Open();
+            return (connection);
+        }
+
 
 
         /// <summary>
