@@ -12,7 +12,7 @@ namespace Wallaby.LocalDb
     public class LocalDB
     {
         private const string DEFAULT_DATA_FOLDER = "Data";
-        private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\v11.0;Initial Catalog=master;Integrated Security=True";
+        private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\v11.0;Integrated Security=True";
         /// <summary>
         /// Gets the default path used for saving the database file.
         /// </summary>
@@ -91,11 +91,12 @@ namespace Wallaby.LocalDb
         /// <returns></returns>
         public static SqlConnection GetConnection(string databaseName, string basePath)
         {
+            // Make sure the database exists
             if (!DatabaseExists(databaseName, basePath))
-            {
                 throw new FileNotFoundException($"Cannot find database {databaseName} at path {basePath}");
-            }
-            var connection = new SqlConnection(BASE_CONNECTION_STRING);
+            SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder(BASE_CONNECTION_STRING);
+            connectionStringBuilder.InitialCatalog=databaseName;
+            var connection = new SqlConnection(connectionStringBuilder.ToString());
             connection.Open();
             return (connection);
         }

@@ -85,6 +85,7 @@ namespace Wallaby.LocalDb.Test
             {
                 KillDatabase(database.Key, database.Value);
             }
+            createdDatabases.Clear();
         }
 
         [TestMethod]
@@ -101,8 +102,8 @@ namespace Wallaby.LocalDb.Test
             Assert.IsNotNull(connection, "Connection object returned from LocalDB.GetConnection is null");
             Assert.IsTrue(connection.State.Equals(ConnectionState.Open));
 
+            // Make sure the catalog is correct
             Assert.AreEqual(connection.Database, databaseName);
-
 
             // Make sure the connection can be closed
             connection.Close();
