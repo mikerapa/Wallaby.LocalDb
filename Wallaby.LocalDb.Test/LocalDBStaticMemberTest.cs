@@ -91,24 +91,29 @@ namespace Wallaby.LocalDb.Test
         [TestMethod]
         public void GetConnectionTest()
         {
-            Random rand = new Random(); 
+            Random rand = new Random();
             // Create a database with a random name and open a connection
             string databaseName = $"database_{String.Join("", Enumerable.Range(0, 8).Select(c => (char)rand.Next(97, 122)).ToArray<char>())}";
             createdDatabases.Add(databaseName, Path.GetTempPath());
+
             LocalDB.CreateDatabase(databaseName, Path.GetTempPath());
-            SqlConnection connection = LocalDB.GetConnection(databaseName, Path.GetTempPath());
 
-            // Make sure the connection is valid and open
-            Assert.IsNotNull(connection, "Connection object returned from LocalDB.GetConnection is null");
-            Assert.IsTrue(connection.State.Equals(ConnectionState.Open));
 
-            // Make sure the catalog is correct
-            Assert.AreEqual(connection.Database, databaseName);
+            using (var connection = LocalDB.GetConnection(databaseName, Path.GetTempPath()))
+            {
 
-            // Make sure the connection can be closed
-            connection.Close();
-            Assert.AreEqual(connection.State, ConnectionState.Closed);
+                // Make sure the connection is valid and open
+                Assert.IsNotNull(connection, "Connection object returned from LocalDB.GetConnection is null");
+                Assert.IsTrue(connection.State.Equals(ConnectionState.Open));
 
+                // Make sure the catalog is correct
+                Assert.AreEqual(connection.Database, databaseName);
+
+                // Make sure the connection can be closed
+                connection.Close();
+                Assert.AreEqual(connection.State, ConnectionState.Closed);
+
+            }
         }
 
         /// <summary>

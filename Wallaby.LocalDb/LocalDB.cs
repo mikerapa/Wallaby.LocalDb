@@ -65,7 +65,6 @@ namespace Wallaby.LocalDb
                 using (var connection = new SqlConnection(BASE_CONNECTION_STRING))
                 {
                     connection.Open();
-                    DetachDatabase(databaseName);
                     SqlCommand command = connection.CreateCommand();
                     command.CommandText = $"CREATE DATABASE {databaseName} ON (NAME = N'{databaseName}', FILENAME = '{fullFilePath}')";
                     command.ExecuteNonQuery();
@@ -96,6 +95,7 @@ namespace Wallaby.LocalDb
                 throw new FileNotFoundException($"Cannot find database {databaseName} at path {basePath}");
             SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder(BASE_CONNECTION_STRING);
             connectionStringBuilder.InitialCatalog=databaseName;
+            connectionStringBuilder.AttachDBFilename = GetDatabaseFullPath(databaseName, basePath);
             var connection = new SqlConnection(connectionStringBuilder.ToString());
             connection.Open();
             return (connection);
@@ -132,8 +132,9 @@ namespace Wallaby.LocalDb
         /// <param name="basePath"></param>
         public static void RemoveDatabase(string databaseName, string basePath)
         {
-            File.Delete(GetDatabaseFullPath(databaseName, basePath));
             File.Delete(GetDatabaseLogPath(databaseName, basePath));
+            File.Delete(GetDatabaseFullPath(databaseName, basePath));
+
         }
 
         public static void DetachDatabase(string databaseName)
@@ -143,10 +144,13 @@ namespace Wallaby.LocalDb
                 using (var connection = new SqlConnection(BASE_CONNECTION_STRING))
                 {
                     connection.Open();
-                    new SqlCommand($"exec sp_detach_db '{databaseName}'", connection).ExecuteNonQuery();
+                    new SqlCommand($"USE master;", connection).ExecuteNonQuery();
+                    new SqlCommand($"ALTER DATABASE {databaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;", connection).ExecuteNonQuery();
+                    new SqlCommand($"exec sp_detach_db '{databaseName}', 'true'", connection).ExecuteNonQuery();
                 }
             }
-            catch { }
+            catch (Exception ex) {
+                System.Diagnostics.Trace.WriteLine(ex.Message); }
         }
     }
 
