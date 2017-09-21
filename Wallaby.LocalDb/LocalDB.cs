@@ -13,6 +13,8 @@ namespace Wallaby.LocalDb
     {
         private const string DEFAULT_DATA_FOLDER = "Data";
         private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\v11.0;Integrated Security=True";
+
+
         /// <summary>
         /// Gets the default path used for saving the database file.
         /// </summary>
@@ -137,6 +139,10 @@ namespace Wallaby.LocalDb
 
         }
 
+        /// <summary>
+        /// Disconnects the database from the database engine. The database must be detached before it can be deleted. 
+        /// </summary>
+        /// <param name="databaseName"></param>
         public static void DetachDatabase(string databaseName)
         {
             try

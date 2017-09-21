@@ -78,6 +78,9 @@ namespace Wallaby.LocalDb.Test
             }
         }
 
+        /// <summary>
+        /// Get rid of any databases that were created during the test
+        /// </summary>
         [TestCleanup]
         public void TestCleanup()
         {
@@ -88,6 +91,9 @@ namespace Wallaby.LocalDb.Test
             createdDatabases.Clear();
         }
 
+        /// <summary>
+        /// Create a database and try to open a connection for it. 
+        /// </summary>
         [TestMethod]
         public void GetConnectionTest()
         {
@@ -126,30 +132,28 @@ namespace Wallaby.LocalDb.Test
         }
 
 
+        /// <summary>
+        /// Create a database, confirm that it exists and delete it
+        /// </summary>
         [TestMethod]
         public void CreateAndDeleteTest()
         {
-            const string testDBName = "TestDB2";
+            Random rand = new Random();
+            string databaseName = $"database_{String.Join("", Enumerable.Range(0, 8).Select(c => (char)rand.Next(97, 122)).ToArray<char>())}";
             string tempBasePath = Path.GetTempPath();
-            LocalDB.DetachDatabase(testDBName);
+            LocalDB.DetachDatabase(databaseName);
 
-
-            // Before starting the test, make sure these files don't exist
-            File.Delete(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath));
-            File.Delete(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath));
-
-
-            Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
-            LocalDB.CreateDatabase(testDBName, tempBasePath);
-            Assert.IsTrue(LocalDB.DatabaseExists(testDBName, tempBasePath));
-            LocalDB.DetachDatabase(testDBName);
-            LocalDB.RemoveDatabase(testDBName, tempBasePath);
-            Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
-            LocalDB.DetachDatabase(testDBName);
+            // Create, make sure it exists, detach, remove, confirm the database doesn't exists
+            LocalDB.CreateDatabase(databaseName, tempBasePath);
+            Assert.IsTrue(LocalDB.DatabaseExists(databaseName, tempBasePath));
+            LocalDB.DetachDatabase(databaseName);
+            LocalDB.RemoveDatabase(databaseName, tempBasePath);
+            Assert.IsFalse(LocalDB.DatabaseExists(databaseName, tempBasePath));
+            LocalDB.DetachDatabase(databaseName);
 
             //Make sure the files have been deleted
-            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath)));
-            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath)));
+            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseFullPath(databaseName, tempBasePath)));
+            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseLogPath(databaseName, tempBasePath)));
         }
     }
 }
