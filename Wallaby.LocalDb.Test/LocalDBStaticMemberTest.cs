@@ -151,5 +151,48 @@ namespace Wallaby.LocalDb.Test
             Assert.IsFalse(File.Exists(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath)));
             Assert.IsFalse(File.Exists(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath)));
         }
+
+
+        [TestMethod]
+        public void CreateDatabaseWithSchemaTest()
+        {
+            const string testDBName = "TestDB2";
+            var testSchema =
+                @"CREATE TABLE USERS(ID INT NOT NULL,NAME VARCHAR(20) NOT NULL, PRIMARY KEY(ID))";
+
+            string tempBasePath = Path.GetTempPath();
+            LocalDB.DetachDatabase(testDBName);
+
+
+            // Before starting the test, make sure these files don't exist
+            File.Delete(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath));
+            File.Delete(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath));
+
+
+            Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
+            LocalDB.CreateDatabase(testDBName, tempBasePath, testSchema);
+            Assert.IsTrue(LocalDB.DatabaseExists(testDBName, tempBasePath));
+
+            using (SqlConnection connection = Wallaby.LocalDb.LocalDB.GetConnection(testDBName, tempBasePath))
+            {
+                SqlCommand command = connection.CreateCommand();
+                command.CommandText = "INSERT INTO Users Values (1, 'Munish'); INSERT INTO Users Values (2, 'Mike')";
+
+                var rows = command.ExecuteNonQuery();
+
+                //Are there two rows in the table now ?
+                Assert.IsTrue(rows == 2);
+            }
+
+
+            LocalDB.DetachDatabase(testDBName);
+            LocalDB.RemoveDatabase(testDBName, tempBasePath);
+            Assert.IsFalse(LocalDB.DatabaseExists(testDBName, tempBasePath));
+            LocalDB.DetachDatabase(testDBName);
+
+            //Make sure the files have been deleted
+            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseFullPath(testDBName, tempBasePath)));
+            Assert.IsFalse(File.Exists(LocalDB.GetDatabaseLogPath(testDBName, tempBasePath)));
+        }
     }
 }
