@@ -75,6 +75,29 @@ namespace Wallaby.LocalDb
         }
 
         /// <summary>
+        /// Create a database with the specified name, path and schema (i.e table/column definition)
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="basePath"></param>
+        /// <param name="schema"></param>
+        public static void CreateDatabase(string databaseName, string basePath, string schema) 
+        {
+            CreateDatabase(databaseName, basePath);
+
+            try
+            {
+                using (var connection = GetConnection(databaseName, basePath))
+                {
+                    SqlCommand command = connection.CreateCommand();
+                    command.CommandText = schema;
+                    command.ExecuteNonQuery();
+                }
+
+            }
+            catch { throw; }
+        }
+
+        /// <summary>
         /// Gets a connection to the database, based on the default file path
         /// </summary>
         /// <param name="databaseName"></param>
