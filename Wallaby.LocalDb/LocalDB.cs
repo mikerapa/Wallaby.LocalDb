@@ -12,7 +12,7 @@ namespace Wallaby.LocalDb
     public class LocalDB
     {
         private const string DEFAULT_DATA_FOLDER = "Data";
-        private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\v11.0;Integrated Security=True";
+        private const string BASE_CONNECTION_STRING = @"Data Source=(LocalDB)\MSSQLLocalDB;Integrated Security=True";
 
 
         /// <summary>
